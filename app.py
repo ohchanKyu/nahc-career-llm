@@ -137,13 +137,17 @@ async def checklist_with_ai(request: Request, _: None = Depends(verify_frontend_
     response_text = response.content.strip()
     print(f"Raw response:\n{repr(response_text)}")
 
-    if response_text.startswith("```json"):
-        response_text = response_text.replace("```json", "").replace("```", "").strip()
-
     if not response_text:
         return {"error": "Empty response received from LLM"}
+    
+    match = re.search(r"```json\s*(.*?)\s*```", response_text, re.DOTALL)
+    if not match:
+        return {"error": "JSON 블록이 응답에 포함되어 있지 않습니다."}
+
+    json_block = match.group(1).strip()
+
     try:
-        parsed_response = json.loads(response_text)
+        parsed_response = json.loads(json_block)
         
     except json.JSONDecodeError as e:
         return {"error": f"Invalid JSON response: {str(e)}"}
