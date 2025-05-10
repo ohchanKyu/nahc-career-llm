@@ -134,15 +134,17 @@ async def checklist_with_ai(request: Request, _: None = Depends(verify_frontend_
     ]
     """
     response = llm.invoke(prompt)
-    print(f"Raw response:\n{repr(response)}")
+    response_text = response.content.strip()
+    print(f"Raw response:\n{repr(response_text)}")
 
-    if response.startswith("```json"):
-        response = response.replace("```json", "").replace("```", "").strip()
-    
-    if not response:
+    if response_text.startswith("```json"):
+        response_text = response_text.replace("```json", "").replace("```", "").strip()
+
+    if not response_text:
         return {"error": "Empty response received from LLM"}
     try:
-        parsed_response = json.loads(response)
+        parsed_response = json.loads(response_text)
+        
     except json.JSONDecodeError as e:
         return {"error": f"Invalid JSON response: {str(e)}"}
     return {"content": parsed_response}
