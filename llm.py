@@ -32,14 +32,26 @@ def get_history_retriever():
     retriever = get_retriever()
     
     contextualize_q_system_prompt = (
-        "Given a chat history and the latest user question, "
-        "which might reference context in the chat history, "
-        "formulate a standalone question which can be understood without the chat history. "
-        "Do NOT answer the question, just reformulate it if needed and otherwise return it as is. "
-        "Additionally, insert natural line breaks at appropriate places such as after periods (.), dashes (-), "
-        "or other punctuation marks where it improves readability."
-        "Use '\\n' to indicate line breaks in the output text."
+        "You are given a chat history and the user's most recent question. "
+        "This question may refer to prior parts of the conversation (e.g., using words like 'it', 'that', or 'he/she')."
+
+        "Your task is to rewrite the latest question so that it is fully self-contained and understandable "
+        "without needing to refer to the earlier messages."
+
+        "Important:"
+        "- Do NOT answer the question."
+        "- Only reformulate the question if it contains references to previous context."
+        "- If it is already self-contained, return it as-is."
+
+        "Formatting Instructions:"
+        "- Insert natural line breaks ('\\n') in long sentences to improve readability."
+        "- Line breaks should go after punctuation marks such as periods (.), commas (,), dashes (-), or colons (:), "
+        "where appropriate."
+        "- Make sure the reformulated question retains the original intent and meaning."
+
+        "Return only the final, reformulated question with line breaks included where necessary."
     )
+
 
     contextualize_q_prompt = ChatPromptTemplate.from_messages(
         [
@@ -83,12 +95,11 @@ def get_rag_chain():
     )
 
     system_prompt = (
-        "당신은 노동 및 고용 전문가입니다. 사용자의 노동 및 고용에 관한 질문에 답변해주세요"
-        "아래에 제공된 문서를 활용해서 답변해주시고"
-        "답변을 알 수 없다면 모른다고 답변해주세요"
-        "답변을 제공할 때는 출처에 따르면 이라고 시작하면서 답변해주시고"
-        "4 ~ 5 문장정도의 내용의 답변을 원합니다"
-        "\n\n"
+        "당신은 노동 및 고용 분야의 전문가입니다. 사용자의 질문에 대해 노동 및 고용 관련 지식을 바탕으로 답변해주세요. "
+        "아래에 제공된 문서를 참고하여 답변하되, 명확한 정보가 없다면 '모르겠습니다'라고 답변해주세요.\n"
+        "답변을 시작할 때는 반드시 '출처에 따르면'이라는 표현으로 시작하고, 4~5문장 정도로 간결하고 명확하게 작성해주세요.\n"
+        "답변에는 문장의 자연스러운 흐름을 유지하고, 의미가 불분명하거나 어색한 표현은 피해주세요.\n"
+        "또한, 모든 한자는 제거하거나 가능한 경우 해당 한자를 한글로 바꾸어 작성해주세요.\n\n"
         "{context}"
     )
     
